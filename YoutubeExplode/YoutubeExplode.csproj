@@ -25,7 +25,6 @@
     <PackageReference Include="AngleSharp" Internalize="true" PrivateAssets="all" />
     <PackageReference Include="Binternal" PrivateAssets="all" />
     <PackageReference Include="CSharpier.MsBuild" PrivateAssets="all" />
-    <PackageReference Include="Deorcify" Internalize="true" PrivateAssets="all" />
     <PackageReference Include="JsonExtensions" Internalize="true" PrivateAssets="all" />
     <PackageReference Include="Lazy.Fody" PrivateAssets="all" />
     <PackageReference
