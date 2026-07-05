@@ -1,8 +1,7 @@
 <Project>
   <PropertyGroup>
-    <Version>0.0.0-dev</Version>
-    <Company>Tyrrrz</Company>
-    <Copyright>Copyright (C) Oleksii Holub</Copyright>
+    <Version>0.0.1</Version>
+    <Company>None</Company>
     <Nullable>enable</Nullable>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -25,9 +24,6 @@
   <PropertyGroup>
     <Authors>$(Company)</Authors>
     <Description>Abstraction layer over YouTube's internal API.</Description>
-    <PackageTags>youtube video download playlist user channel closed caption tracks subtitles parse extract metadata info net core standard</PackageTags>
-    <PackageProjectUrl>https://github.com/Tyrrrz/YoutubeExplode</PackageProjectUrl>
-    <PackageReleaseNotes>https://github.com/Tyrrrz/YoutubeExplode/releases</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 </Project>
