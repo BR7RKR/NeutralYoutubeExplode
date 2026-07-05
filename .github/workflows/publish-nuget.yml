@@ -1,0 +1,76 @@
+name: Publish NuGet
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Package version, for example 0.0.1"
+        required: true
+        default: "0.0.1"
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  PACKAGE_ID: neutralyoutubeexplode
+  PROJECT_PATH: YoutubeExplode/YoutubeExplode.csproj
+
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Resolve package version
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $version = "${{ inputs.version }}"
+          } else {
+            $version = "${{ github.ref_name }}"
+          }
+
+          $version = $version -replace '^v', ''
+          "PACKAGE_VERSION=$version" >> $env:GITHUB_ENV
+
+      - name: Restore
+        run: dotnet restore YoutubeExplode.slnx
+
+      - name: Pack
+        shell: pwsh
+        run: >
+          dotnet pack $env:PROJECT_PATH
+          --configuration Release
+          --no-restore
+          --output artifacts
+          -p:PackageId=$env:PACKAGE_ID
+          -p:Version=$env:PACKAGE_VERSION
+          -p:RepositoryUrl=https://github.com/${{ github.repository }}
+
+      - name: Add GitHub Packages source
+        run: >
+          dotnet nuget add source
+          --username "${{ github.actor }}"
+          --password "${{ secrets.AUTH_TOKEN }}"
+          --store-password-in-clear-text
+          --name github
+          "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+
+      - name: Publish
+        shell: pwsh
+        run: >
+          dotnet nuget push "artifacts/*.nupkg"
+          --source github
+          --api-key "${{ secrets.AUTH_TOKEN }}"
+          --skip-duplicate
