@@ -1,6 +1,10 @@
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
+using AwesomeAssertions;
 using Xunit;
 using Xunit.Abstractions;
 using YoutubeExplode.Common;
@@ -11,6 +15,38 @@ namespace YoutubeExplode.Tests;
 
 public class PlaylistSpecs(ITestOutputHelper testOutput)
 {
+    private sealed class EmptyPlaylistHandler : HttpMessageHandler
+    {
+        public JsonValueKind? RequestedVideoIdKind { get; private set; }
+
+        protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken
+        )
+        {
+            using var body = JsonDocument.Parse(await request.Content!.ReadAsStringAsync());
+            RequestedVideoIdKind = body.RootElement.GetProperty("videoId").ValueKind;
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    """{"contents":{"twoColumnWatchNextResults":{"playlist":{"playlist":{"contents":[]}}}}}"""
+                ),
+            };
+        }
+    }
+
+    [Fact]
+    public async Task I_can_start_a_playlist_without_a_video_ID()
+    {
+        var handler = new EmptyPlaylistHandler();
+        using var http = new HttpClient(handler);
+        using var youtube = new YoutubeClient(http);
+
+        await youtube.Playlists.GetVideosAsync(PlaylistIds.Normal);
+
+        handler.RequestedVideoIdKind.Should().Be(JsonValueKind.Null);
+    }
+
     [Fact]
     public async Task I_can_get_the_metadata_of_a_playlist()
     {
